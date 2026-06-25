@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>唤醒后状态测评量表</title>
+<style>
+  :root{
+    --bg:#f7f5f2;
+    --card:#ffffff;
+    --ink:#2b2620;
+    --ink-soft:#6b6258;
+    --accent:#a8643b;
+    --accent-soft:#f0e2d6;
+    --line:#e6e0d8;
+    --ctrl:#c97b3f;
+    --exp:#3f7a6b;
+    --warn:#c0463a;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    padding-bottom:60px;
+  }
+  header{
+    background:var(--card);
+    border-bottom:1px solid var(--line);
+    padding:16px 20px;
+    position:sticky;
+    top:0;
+    z-index:10;
+  }
+  header h1{
+    font-size:18px;
+    margin:0 0 10px 0;
+    font-weight:600;
+  }
+  .tabs{
+    display:flex;
+    gap:8px;
+  }
+  .tab-btn{
+    flex:1;
+    padding:10px 8px;
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:10px;
+    font-size:14px;
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:all .15s;
+  }
+  .tab-btn.active{
+    background:var(--accent);
+    color:#fff;
+    border-color:var(--accent);
+  }
+  main{
+    max-width:680px;
+    margin:0 auto;
+    padding:18px 16px 40px;
+  }
+  .card{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:18px;
+    margin-bottom:16px;
+    border:1px solid var(--line);
+  }
+  .field-row{
+    display:flex;
+    gap:10px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .field{
+    flex:1;
+    min-width:140px;
+  }
+  label.field-label{
+    display:block;
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+  input[type=text]{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    font-size:15px;
+    background:#fcfbf9;
+  }
+  .seg{
+    display:flex;
+    gap:6px;
+  }
+  .seg button{
+    flex:1;
+    padding:9px 6px;
+    border:1px solid var(--line);
+    background:#fcfbf9;
+    border-radius:10px;
+    font-size:13px;
+    cursor:pointer;
+    color:var(--ink-soft);
+  }
+  .seg button.sel[data-val="对照组"]{background:var(--ctrl);color:#fff;border-color:var(--ctrl);}
+  .seg button.sel[data-val="实验组"]{background:var(--exp);color:#fff;border-color:var(--exp);}
+
+  .question{
+    border-top:1px solid var(--line);
+    padding:16px 0;
+  }
+  .question:first-of-type{border-top:none;padding-top:4px;}
+  .q-title{
+    font-size:14.5px;
+    font-weight:600;
+    margin-bottom:10px;
+    line-height:1.5;
+  }
+  .q-anchors{
+    display:flex;
+    justify-content:space-between;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .scale{
+    display:flex;
+    gap:5px;
+    flex-wrap:wrap;
+  }
+  .scale button{
+    flex:1;
+    min-width:28px;
+    padding:9px 0;
+    border:1px solid var(--line);
+    background:#fcfbf9;
+    border-radius:8px;
+    font-size:13.5px;
+    cursor:pointer;
+    color:var(--ink);
+  }
+  .scale button.sel{
+    background:var(--accent);
+    color:#fff;
+    border-color:var(--accent);
+    font-weight:600;
+  }
+  .ref-chip{
+    display:inline-block;
+    margin-top:8px;
+    padding:4px 10px;
+    background:var(--accent-soft);
+    border-radius:20px;
+    font-size:12px;
+    color:var(--accent);
+  }
+  .ref-chip b{font-size:13px;}
+
+  .submit-btn{
+    width:100%;
+    padding:14px;
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    border-radius:12px;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    margin-top:6px;
+  }
+  .submit-btn:disabled{
+    background:#cfc7bd;
+    cursor:not-allowed;
+  }
+  .status-banner{
+    padding:10px 14px;
+    border-radius:10px;
+    font-size:13px;
+    margin-bottom:14px;
+  }
+  .status-banner.ok{background:#e7f2ed;color:#2e6b53;}
+  .status-banner.warn{background:#fbe9e7;color:var(--warn);}
+  .status-banner.info{background:var(--accent-soft);color:var(--accent);}
+
+  /* Researcher view */
+  .lookup-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .lookup-row input{flex:1;}
+  .lookup-row button{
+    padding:10px 18px;
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    font-size:14px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  table.compare{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  table.compare th, table.compare td{
+    border:1px solid var(--line);
+    padding:8px 6px;
+    text-align:center;
+  }
+  table.compare th{
+    background:#fbf9f6;
+    font-weight:600;
+    font-size:12px;
+  }
+  .edit-btn{
+    display:block;
+    margin:6px auto 0;
+    padding:4px 10px;
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    font-size:11.5px;
+    cursor:pointer;
+  }
+  table.compare td.qname{
+    text-align:left;
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  table.compare td.flag-same{
+    background:#fbe9e7;
+    color:var(--warn);
+    font-weight:700;
+  }
+  table.compare td.flag-diff{
+    background:#e7f2ed;
+  }
+  .record-meta{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+  .legend{
+    display:flex;
+    gap:16px;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:10px;
+    flex-wrap:wrap;
+  }
+  .legend span{display:flex;align-items:center;gap:5px;}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+
+  .export-btn{
+    width:100%;
+    padding:12px;
+    background:var(--exp);
+    color:#fff;
+    border:none;
+    border-radius:12px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    margin-top:14px;
+  }
+  .empty-state{
+    text-align:center;
+    color:var(--ink-soft);
+    padding:30px 10px;
+    font-size:14px;
+  }
+  .small-note{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:6px;
+    line-height:1.5;
+  }
+  .hidden{display:none !important;}
+  .save-indicator{
+    font-size:12px;
+    color:var(--ink-soft);
+    text-align:center;
+    margin-top:8px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>唤醒后状态测评量表</h1>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="fill">填写问卷</button>
+    <button class="tab-btn" data-tab="review">研究人员核对</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ FILL TAB ============ -->
+  <div id="tab-fill">
+    <div class="card">
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">受试者编号</label>
+          <input type="text" id="subjectId" placeholder="例如 001" inputmode="numeric">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">实验组别</label>
+          <div class="seg" id="groupSeg">
+            <button data-val="对照组">对照组</button>
+            <button data-val="实验组">实验组</button>
+          </div>
+        </div>
+      </div>
+      <div id="refBanner"></div>
+    </div>
+
+    <div class="card" id="questionCard">
+      <!-- questions injected by JS -->
+    </div>
+
+    <button class="submit-btn" id="submitBtn" disabled>请先填写编号、组别与天次</button>
+    <div class="save-indicator" id="saveIndicator"></div>
+  </div>
+
+  <!-- ============ REVIEW TAB ============ -->
+  <div id="tab-review" class="hidden">
+    <div class="card">
+      <div class="lookup-row">
+        <input type="text" id="lookupId" placeholder="输入受试者编号，例如 001" inputmode="numeric">
+        <button id="lookupBtn">查看</button>
+      </div>
+      <div class="legend">
+        <span><span class="dot" style="background:#fbe9e7;border:1px solid var(--warn)"></span>两天分数完全相同（建议核实）</span>
+        <span><span class="dot" style="background:#e7f2ed;border:1px solid #2e6b53"></span>两天分数有差异（正常）</span>
+      </div>
+    </div>
+    <div id="reviewResult"></div>
+  </div>
+
+</main>
+
+<script>
+/* ===================== CONFIG ===================== */
+// jsonbin.io shared cloud storage — every device that opens this page reads/writes the SAME bin below.
+// This bin was created once in advance; do not let each device create its own.
+const JSONBIN_BASE = "https://api.jsonbin.io/v3/b";
+const SHARED_BIN_ID = "6a3cca50da38895dfefb9cf9";
+// Restricted access key (Read + Create + Update only, no Delete) — safe to expose in frontend code.
+const JSONBIN_ACCESS_KEY = "$2a$10$hqvznxXZxSTDOLaUsz6YUOtRZ6grhOIE7RndKywoB9nyatysS2qPW";
+
+const QUESTIONS = [
+  { id:"q3", title:"请评估您当前的起床气（烦躁、情绪差）程度", min:0, max:10, leftLabel:"完全没有起床气", rightLabel:"极度严重的起床气" },
+  { id:"q4", title:"请选择最符合你当前状态的分数（清醒度）", min:1, max:9, leftLabel:"极度清醒", rightLabel:"极度困倦，无法保持清醒" },
+  { id:"q5", title:"昨晚/午休的入睡速度", min:1, max:10, leftLabel:"非常困难/很久才睡着", rightLabel:"非常快/瞬间入睡" },
+  { id:"q6", title:"睡眠过程中的安稳程度", min:1, max:10, leftLabel:"非常不安稳/易醒", rightLabel:"非常安稳/一觉到天亮" },
+  { id:"q7", title:"睡前的放松程度", min:1, max:10, leftLabel:"非常紧张/焦虑", rightLabel:"非常放松/身心舒畅" },
+  { id:"q8", title:"对助眠模式（灯光/声音/触感）的喜爱度评价", min:1, max:10, leftLabel:"非常不喜欢/干扰睡眠", rightLabel:"非常喜欢/享受" },
+  { id:"q9", title:"对唤醒模式（灯光/声音/触感）的喜爱度评价", min:1, max:10, leftLabel:"非常反感/惊吓", rightLabel:"非常喜欢" },
+  { id:"q10", title:"您是否愿意在日常生活中长期使用该产品辅助睡眠？", min:1, max:10, leftLabel:"完全不愿意", rightLabel:"非常愿意" },
+  { id:"q11", title:"请评估您当前的愉悦程度", min:0, max:10, leftLabel:"非常不愉悦", rightLabel:"非常愉悦" },
+];
+
+/* ===================== STORAGE LAYER ===================== */
+// Reads/writes the single SHARED_BIN_ID above so every device sees the same data.
+// Falls back to localStorage if network fails (so data is never lost on this device,
+// but it won't be visible to other devices until the network issue is resolved and a re-save happens).
+
+let allRecords = [];
+let cloudAvailable = true;
+
+async function loadRecords(){
+  try{
+    const res = await fetch(`${JSONBIN_BASE}/${SHARED_BIN_ID}/latest`, {
+      headers: { "X-Access-Key": JSONBIN_ACCESS_KEY }
+    });
+    if(!res.ok) throw new Error("fetch failed: " + res.status);
+    const data = await res.json();
+    allRecords = (data.record && data.record.records) || [];
+    cloudAvailable = true;
+  }catch(e){
+    cloudAvailable = false;
+    console.warn("Cloud load failed, using last locally cached copy on this device.", e);
+    const local = localStorage.getItem("wake_survey_local_records");
+    allRecords = local ? JSON.parse(local) : [];
+  }
+  return allRecords;
+}
+
+async function saveRecords(){
+  localStorage.setItem("wake_survey_local_records", JSON.stringify(allRecords));
+  try{
+    const res = await fetch(`${JSONBIN_BASE}/${SHARED_BIN_ID}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Access-Key": JSONBIN_ACCESS_KEY
+      },
+      body: JSON.stringify({ records: allRecords })
+    });
+    if(!res.ok) throw new Error("save failed: " + res.status);
+    cloudAvailable = true;
+    return true;
+  }catch(e){
+    cloudAvailable = false;
+    console.warn("Cloud save failed; saved locally only on this device.", e);
+    return false;
+  }
+}
+
+/* ===================== STATE ===================== */
+let state = {
+  subjectId: "",
+  group: null,
+  answers: {}
+};
+
+// Normalize subject IDs for case-insensitive but otherwise exact matching (e.g. "001ab" === "001AB").
+function normId(id){
+  return (id || "").trim().toUpperCase();
+}
+
+/* ===================== RENDER: QUESTIONS ===================== */
+function renderQuestions(){
+  const card = document.getElementById("questionCard");
+  card.innerHTML = "";
+  QUESTIONS.forEach(q => {
+    const wrap = document.createElement("div");
+    wrap.className = "question";
+    wrap.innerHTML = `
+      <div class="q-title">${q.title}</div>
+      <div class="q-anchors"><span>${q.leftLabel}</span><span>${q.rightLabel}</span></div>
+      <div class="scale" id="scale-${q.id}"></div>
+      <div id="refchip-${q.id}"></div>
+    `;
+    card.appendChild(wrap);
+    const scaleDiv = wrap.querySelector(`#scale-${q.id}`);
+    for(let v = q.min; v <= q.max; v++){
+      const btn = document.createElement("button");
+      btn.textContent = v;
+      btn.dataset.val = v;
+      btn.onclick = () => {
+        state.answers[q.id] = v;
+        scaleDiv.querySelectorAll("button").forEach(b => b.classList.remove("sel"));
+        btn.classList.add("sel");
+        updateSubmitState();
+      };
+      scaleDiv.appendChild(btn);
+    }
+  });
+}
+
+function updateReferenceDisplay(){
+  // Reference = this subject's OTHER group's record, whichever was filled first.
+  // (No fixed order: filling 对照组 shows 实验组 as reference if it exists, and vice versa.)
+  const refRecord = findReferenceRecord();
+  const banner = document.getElementById("refBanner");
+
+  QUESTIONS.forEach(q => {
+    const chipDiv = document.getElementById(`refchip-${q.id}`);
+    if(!chipDiv) return;
+    if(refRecord && refRecord.answers[q.id] !== undefined){
+      chipDiv.innerHTML = `<span class="ref-chip">${refRecord.group}你填的是 <b>${refRecord.answers[q.id]}</b></span>`;
+    } else {
+      chipDiv.innerHTML = "";
+    }
+  });
+
+  if(state.subjectId && state.group){
+    if(refRecord){
+      banner.innerHTML = `<div class="status-banner ok">受试者 ${state.subjectId} 在「${refRecord.group}」下已有记录，填写每题时可参考。</div>`;
+    } else {
+      banner.innerHTML = `<div class="status-banner info">受试者 ${state.subjectId} 目前还没有其他组别的记录 —— 这应该是该受试者的第一次填写。</div>`;
+    }
+  } else {
+    banner.innerHTML = "";
+  }
+}
+
+function findReferenceRecord(){
+  // Reference = this subject's record from the OTHER group (whichever was already submitted).
+  if(!state.subjectId || !state.group) return null;
+  const id = normId(state.subjectId);
+  return allRecords.find(r => normId(r.subjectId) === id && r.group !== state.group) || null;
+}
+
+function findRecord(subjectId, group){
+  const id = normId(subjectId);
+  return allRecords.find(r => normId(r.subjectId) === id && r.group === group) || null;
+}
+
+/* ===================== UI: TOP FIELDS ===================== */
+document.getElementById("subjectId").addEventListener("input", (e) => {
+  state.subjectId = e.target.value.trim();
+  updateReferenceDisplay();
+  updateSubmitState();
+});
+
+document.querySelectorAll("#groupSeg button").forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll("#groupSeg button").forEach(b => b.classList.remove("sel"));
+    btn.classList.add("sel");
+    state.group = btn.dataset.val;
+    updateReferenceDisplay();
+    updateSubmitState();
+  };
+});
+
+function updateSubmitState(){
+  const btn = document.getElementById("submitBtn");
+  const allAnswered = QUESTIONS.every(q => state.answers[q.id] !== undefined);
+  const headerOk = state.subjectId && state.group;
+  if(headerOk && allAnswered){
+    btn.disabled = false;
+    btn.textContent = "提交问卷";
+  } else if(!headerOk){
+    btn.disabled = true;
+    btn.textContent = "请先填写编号、组别与天次";
+  } else {
+    const remaining = QUESTIONS.filter(q => state.answers[q.id] === undefined).length;
+    btn.disabled = true;
+    btn.textContent = `还有 ${remaining} 题未填写`;
+  }
+}
+
+/* ===================== SUBMIT ===================== */
+document.getElementById("submitBtn").addEventListener("click", async () => {
+  const existing = findRecord(state.subjectId, state.group);
+  if(existing && !confirm(`受试者 ${state.subjectId}（${state.group}）已有记录，是否覆盖？`)){
+    return;
+  }
+
+  const id = normId(state.subjectId);
+  const record = {
+    subjectId: state.subjectId.trim(), // keep original casing for display, but matching is always case-insensitive
+    group: state.group,
+    answers: { ...state.answers },
+    submittedAt: new Date().toISOString()
+  };
+
+  if(existing){
+    allRecords = allRecords.filter(r => !(normId(r.subjectId) === id && r.group === state.group));
+  }
+  allRecords.push(record);
+
+  const indicator = document.getElementById("saveIndicator");
+  indicator.textContent = "正在保存…";
+  const cloudOk = await saveRecords();
+  indicator.textContent = cloudOk
+    ? "✓ 已提交并同步到云端"
+    : "✓ 已提交（仅保存在本设备，云端同步失败，请检查网络）";
+
+  // reset form for next subject, keep group selection as-is for convenience
+  state.subjectId = "";
+  state.answers = {};
+  document.getElementById("subjectId").value = "";
+  renderQuestions();
+  updateReferenceDisplay();
+  updateSubmitState();
+});
+
+/* ===================== TABS ===================== */
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.onclick = async () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    const tab = btn.dataset.tab;
+    document.getElementById("tab-fill").classList.toggle("hidden", tab !== "fill");
+    document.getElementById("tab-review").classList.toggle("hidden", tab !== "review");
+    if(tab === "review"){
+      await loadRecords();
+      renderReview();
+    }
+  };
+});
+
+/* ===================== REVIEW TAB ===================== */
+document.getElementById("lookupBtn").addEventListener("click", async () => {
+  await loadRecords();
+  renderReview();
+});
+
+function renderReview(){
+  const id = document.getElementById("lookupId").value.trim();
+  const resultDiv = document.getElementById("reviewResult");
+  if(!id){
+    resultDiv.innerHTML = `<div class="empty-state">请输入受试者编号查看对比结果</div>`;
+    return;
+  }
+  const normLookup = normId(id);
+  const records = allRecords.filter(r => normId(r.subjectId) === normLookup);
+  if(records.length === 0){
+    resultDiv.innerHTML = `<div class="empty-state">未找到受试者 ${id} 的任何记录</div>`;
+    return;
+  }
+  // Each subject has at most one 对照组 record and one 实验组 record.
+  const ctrl = records.find(r => r.group === "对照组");
+  const exp = records.find(r => r.group === "实验组");
+  const cols = [ctrl, exp].filter(Boolean);
+
+  let html = `<div class="card"><table class="compare"><thead><tr><th class="qname">题目</th>`;
+  cols.forEach((c, idx) => {
+    html += `<th>${c.group}<div class="record-meta">${new Date(c.submittedAt).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div><button class="edit-btn" data-edit-idx="${idx}">✎ 修改</button></th>`;
+  });
+  html += `</tr></thead><tbody>`;
+
+  const hasBothGroups = cols.length === 2;
+  QUESTIONS.forEach(q => {
+    html += `<tr><td class="qname">${q.title}</td>`;
+    cols.forEach((c) => {
+      const v = c.answers[q.id];
+      let cls = "";
+      if(hasBothGroups){
+        const otherV = (c.group === "对照组" ? exp : ctrl).answers[q.id];
+        cls = (v === otherV) ? "flag-same" : "flag-diff";
+      }
+      html += `<td class="${cls}">${v !== undefined ? v : "—"}</td>`;
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table></div>`;
+  html += `<div class="small-note">标红表示该受试者「对照组」与「实验组」填了完全相同的分数 —— 建议核对访谈记录是否一致。</div>`;
+  resultDiv.innerHTML = html;
+
+  // wire up edit buttons (re-render means we must re-attach each time)
+  resultDiv.querySelectorAll(".edit-btn").forEach(btn => {
+    btn.onclick = () => {
+      const idx = parseInt(btn.dataset.editIdx, 10);
+      loadRecordForEditing(cols[idx]);
+    };
+  });
+}
+
+function loadRecordForEditing(record){
+  // switch to fill tab
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === "fill"));
+  document.getElementById("tab-fill").classList.remove("hidden");
+  document.getElementById("tab-review").classList.add("hidden");
+
+  // populate header fields
+  state.subjectId = record.subjectId;
+  state.group = record.group;
+  state.answers = { ...record.answers };
+
+  document.getElementById("subjectId").value = record.subjectId;
+  document.querySelectorAll("#groupSeg button").forEach(b => b.classList.toggle("sel", b.dataset.val === record.group));
+
+  // re-render questions then pre-select each answer
+  renderQuestions();
+  QUESTIONS.forEach(q => {
+    const val = record.answers[q.id];
+    if(val === undefined) return;
+    const scaleDiv = document.getElementById(`scale-${q.id}`);
+    if(!scaleDiv) return;
+    scaleDiv.querySelectorAll("button").forEach(b => {
+      b.classList.toggle("sel", parseInt(b.dataset.val,10) === val);
+    });
+  });
+
+  updateReferenceDisplay();
+  updateSubmitState();
+
+  const banner = document.getElementById("refBanner");
+  banner.innerHTML = `<div class="status-banner info">正在修改受试者 ${record.subjectId}（${record.group}）已提交的记录，改完后点"提交问卷"会覆盖原记录。</div>` + banner.innerHTML;
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ===================== EXPORT CSV ===================== */
+function buildCsv(){
+  const headers = ["受试者编号","组别","提交时间", ...QUESTIONS.map(q => q.title)];
+  const rows = allRecords
+    .slice()
+    .sort((a,b) => a.subjectId.localeCompare(b.subjectId) || a.group.localeCompare(b.group))
+    .map(r => [
+      r.subjectId, r.group, r.submittedAt,
+      ...QUESTIONS.map(q => r.answers[q.id] !== undefined ? r.answers[q.id] : "")
+    ]);
+  const escape = (val, isId) => {
+    const s = String(val ?? "");
+    // Force subject ID into an Excel "text" cell so leading zeros (e.g. "001AB") are never stripped.
+    if(isId) return `="${s.replace(/"/g,'""')}"`;
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+  };
+  const csvLines = [headers, ...rows].map((row, rowIdx) =>
+    row.map((cell, colIdx) => escape(cell, rowIdx > 0 && colIdx === 0)).join(",")
+  );
+  return "\uFEFF" + csvLines.join("\r\n"); // BOM for Excel UTF-8 compatibility
+}
+
+function downloadCsv(){
+  const csv = buildCsv();
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const ts = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `唤醒后状态测评_全部数据_${ts}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Add export button to review tab (appended once, after first render)
+(function addExportButton(){
+  const btn = document.createElement("button");
+  btn.className = "export-btn";
+  btn.textContent = "⬇ 导出全部受试者数据（CSV / Excel可打开）";
+  btn.onclick = async () => {
+    await loadRecords();
+    if(allRecords.length === 0){
+      alert("目前还没有任何已提交的数据。");
+      return;
+    }
+    downloadCsv();
+  };
+  document.getElementById("tab-review").querySelector(".card").appendChild(btn);
+})();
+
+/* ===================== INIT ===================== */
+(async function init(){
+  renderQuestions();
+  updateSubmitState();
+  await loadRecords();
+})();
+</script>
+</body>
+</html>
